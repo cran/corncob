@@ -1,4 +1,4 @@
-8b0e11d3bf3970176602a6b50d1e6d12 *DESCRIPTION
+1f410d329b0efa8775f15bd5c67d45e0 *DESCRIPTION
 5164cffcd6bdbf86a1d2b86ea56260b6 *NAMESPACE
 729a10a1ca3b92052e3af5dd42d02363 *R/HDIbetabinom.R
 d854c77ec9bbd2bf61c5239a2f96908c *R/bbdml.R
@@ -40,7 +40,7 @@ d20a1e5f50e283a681c84e8a40711367 *README.md
 de318eed9dff9ede3f7e59a4b044ac5b *data/ibd_phylo.rda
 77962873b30019109bfea155381c0b2d *data/soil_phylo.rda
 5035d27e2c5a3634f2c3235f526840f3 *data/soil_phylum_small.rda
-300bd2fe47feca1700fb61f7e4bea3cf *inst/doc/corncob-intro.pdf
+49b02886196442883e4c6a1418007c9b *inst/doc/corncob-intro.pdf
 28cfa4371a37a0ea11bc4b8dd96d4fa4 *inst/doc/corncob-intro.pdf.asis
 17a1d2595378556c31d9c63ed4b46374 *man/HDIbetabinom.Rd
 e957b2db0383230f33e9be49f70b6e6d *man/bbdml.Rd
