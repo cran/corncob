@@ -1,7 +1,7 @@
-1f410d329b0efa8775f15bd5c67d45e0 *DESCRIPTION
+515c847de4cd638002f0c239102f7ded *DESCRIPTION
 5164cffcd6bdbf86a1d2b86ea56260b6 *NAMESPACE
 729a10a1ca3b92052e3af5dd42d02363 *R/HDIbetabinom.R
-d854c77ec9bbd2bf61c5239a2f96908c *R/bbdml.R
+5b676afc31cacad16175dd260004a2e0 *R/bbdml.R
 f578dd2dc1e807452e95c7e866f0daef *R/checkNested.R
 76b4709087765f50563f38bdf8c67fd7 *R/clean_taxa_names.R
 2a33d47c1c134f0fc53701519caf1070 *R/contrastsTest.R
@@ -35,8 +35,8 @@ c00d4c8d737a91d068f745e2763dbe73 *R/soil_phylo.R
 8fa34b6cd028711a660954cd035ccf74 *R/summary_bbdml.R
 f46eee89eb79508ed86c64cf61526f57 *R/utils-pipe.R
 a7bd24ede84bc748c53833f6f33d3d29 *R/wald.R
-d20a1e5f50e283a681c84e8a40711367 *README.md
-25008d3dcec3978d3c9d4d5df8fd35d7 *build/vignette.rds
+0086f51d4465011e23e7b1b6b3e7fb77 *README.md
+51d5a450ea2708c5dd5e2d1b3edb1072 *build/vignette.rds
 de318eed9dff9ede3f7e59a4b044ac5b *data/ibd_phylo.rda
 77962873b30019109bfea155381c0b2d *data/soil_phylo.rda
 5035d27e2c5a3634f2c3235f526840f3 *data/soil_phylum_small.rda
