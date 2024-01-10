@@ -2,7 +2,7 @@
 % Please edit documentation in R/hessian.R
 \name{hessian}
 \alias{hessian}
-\title{Compute Hessian matrix}
+\title{Compute Hessian matrix at the MLE}
 \usage{
 hessian(mod, numerical = FALSE)
 }
@@ -12,16 +12,18 @@ hessian(mod, numerical = FALSE)
 \item{numerical}{Boolean. Defaults to \code{FALSE}. Indicator of whether to use the numeric Hessian (not recommended).}
 }
 \value{
-Hessian matrix
+Hessian matrix at the MLE. In this setting, it's hard to compute expectations to calculate the information matrix,
+so we return the consistent estimate using sample moments:
+\eqn{\hat{A}(\hat{\theta}) = \sum_i \frac{\partial^2}{\partial \theta \partial \theta^T} l(\theta, W_i)} evaluated at \eqn{\theta = \hat{\theta}}.
 }
 \description{
-Compute Hessian matrix
+Compute Hessian matrix at the MLE
 }
 \examples{
-data(soil_phylum_small)
-mod <- bbdml(formula = OTU.1 ~ DayAmdmt,
+data(soil_phylum_small_otu1)
+mod <- bbdml(formula = cbind(W, M - W) ~ DayAmdmt,
 phi.formula = ~ DayAmdmt,
-data = soil_phylum_small)
+data = soil_phylum_small_otu1)
 hessian(mod)
 
 }

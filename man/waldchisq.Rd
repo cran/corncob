@@ -10,7 +10,8 @@ waldchisq(
   restrictions = NULL,
   restrictions.phi = NULL,
   contrasts_DA = NULL,
-  contrasts_DV = NULL
+  contrasts_DV = NULL,
+  robust = FALSE
 )
 }
 \arguments{
@@ -25,28 +26,34 @@ waldchisq(
 \item{contrasts_DA}{List. Optional. Constructs a contrast matrix. List elements should be characters specifying contrasts in the parameters within \code{formula}. Note that this is only available with \code{"Wald"} value for \code{test}.}
 
 \item{contrasts_DV}{List. Optional. Constructs a contrast matrix. List elements should be characters specifying contrasts in the parameters within \code{phi.formula}. Note that this is only available with \code{"Wald"} value for \code{test}.}
+
+\item{robust}{Should robust standard errors be used? If not, model-based standard arras are used. Logical, defaults to \code{FALSE}.}
 }
 \value{
+Matrix with wald test statistics and p-values. Only performs univariate tests.
+
 P-value from Wald test.
 }
 \description{
 Wald-type chi-squared test
 }
 \examples{
-data(soil_phylum_small)
-mod1 <- bbdml(formula = OTU.1 ~ DayAmdmt,
+data(soil_phylum_small_otu1)
+mod1 <- bbdml(formula = cbind(W, M - W) ~ DayAmdmt,
 phi.formula = ~ DayAmdmt,
-data = soil_phylum_small)
+data = soil_phylum_small_otu1)
 
-mod2 <- bbdml(formula = OTU.1 ~ 1,
+mod2 <- bbdml(formula = cbind(W, M - W) ~ 1,
 phi.formula = ~ 1,
-data = soil_phylum_small)
+data = soil_phylum_small_otu1)
 
 # Example using mod_null
 waldchisq(mod = mod1, mod_null = mod2)
+waldchisq(mod = mod1, mod_null = mod2, robust = TRUE)
 
 # Example using restrictions and restrictions.phi
 waldchisq(mod = mod1, restrictions = 2, restrictions.phi = 2)
 waldchisq(mod = mod1, restrictions = "DayAmdmt", restrictions.phi = "DayAmdmt")
 waldchisq(mod = mod1, restrictions = 2, restrictions.phi = "DayAmdmt")
+waldchisq(mod = mod1, restrictions = 2, restrictions.phi = 2, robust = TRUE)
 }

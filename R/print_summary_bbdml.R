@@ -9,10 +9,10 @@
 #' @return \code{NULL}. Displays printed model summary.
 #'
 #' @examples
-#' data(soil_phylum_small)
-#' mod <- bbdml(formula = OTU.1 ~ DayAmdmt,
+#' data(soil_phylum_small_otu1)
+#' mod <- bbdml(formula = cbind(W, M - W) ~ DayAmdmt,
 #' phi.formula = ~ DayAmdmt,
-#' data = soil_phylum_small)
+#' data = soil_phylum_small_otu1)
 #' print(summary(mod))
 #' @export
 print.summary.bbdml <- function(x, digits = max(3L, getOption("digits") - 3L),
@@ -40,7 +40,7 @@ print.summary.bbdml <- function(x, digits = max(3L, getOption("digits") - 3L),
   if (x$sep_da || x$sep_dv) {
     warning("This model is based on a discriminant taxa.
 You may see NAs in the model summary because Wald testing is invalid.
-Likelihood ratio testing can be used, but valid standard errors cannot be calculated.",
+Likelihood ratio and Rao testing can be used, but valid standard errors cannot be calculated.",
             immediate. = TRUE)
   }
 }

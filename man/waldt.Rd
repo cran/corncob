@@ -2,7 +2,7 @@
 % Please edit documentation in R/wald.R
 \name{waldt}
 \alias{waldt}
-\title{Wald-type t test}
+\title{Wald-type t test (model-based or robust)}
 \usage{
 waldt(mod)
 }
@@ -13,16 +13,13 @@ waldt(mod)
 Matrix with wald test statistics and p-values. Only performs univariate tests.
 }
 \description{
-Wald-type t test
+Wald-type t test (model-based or robust)
 }
 \examples{
-data(soil_phylo)
-soil <- soil_phylo \%>\%
-phyloseq::subset_samples(DayAmdmt \%in\% c(11,21)) \%>\%
-phyloseq::tax_glom("Phylum")
-mod1 <- bbdml(formula = OTU.1 ~ DayAmdmt,
+data(soil_phylum_small_otu1)
+mod <- bbdml(formula = cbind(W, M - W) ~ DayAmdmt,
 phi.formula = ~ DayAmdmt,
-data = soil)
-waldt(mod1)
+data = soil_phylum_small_otu1)
+waldt(mod)
 
 }

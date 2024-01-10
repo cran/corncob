@@ -15,6 +15,8 @@ bbdml(
   numerical = FALSE,
   nstart = 1,
   inits = NULL,
+  allow_noninteger = FALSE,
+  robust = FALSE,
   ...
 )
 }
@@ -29,9 +31,9 @@ bbdml(
 
 \item{phi.link}{link function for dispersion covariates, defaults to \code{"logit"}}
 
-\item{method}{optimization method, defaults to \code{"trust"}, or see \code{\link{optimr}} for other options}
+\item{method}{optimization method, defaults to \code{"trust"}, or see \code{\link[optimx]{optimr}} for other options}
 
-\item{control}{optimization control parameters (see \code{\link{optimr}})}
+\item{control}{optimization control parameters (see \code{\link[optimx]{optimr}})}
 
 \item{numerical}{Boolean. Defaults to \code{FALSE}. Indicator of whether to use the numeric Hessian (not recommended).}
 
@@ -39,7 +41,11 @@ bbdml(
 
 \item{inits}{Optional initializations as rows of a matrix. Defaults to \code{NULL}.}
 
-\item{...}{Optional additional arguments for \code{\link{optimr}} or \code{\link{trust}}}
+\item{allow_noninteger}{Boolean. Defaults to \code{FALSE}. Should noninteger W's and M's be allowed? This behavior was not permitted prior to v4.1, needs to be explicitly allowed.}
+
+\item{robust}{Should robust standard errors be returned? If not, model-based standard arras are used. Logical, defaults to \code{FALSE}.}
+
+\item{...}{Optional additional arguments for \code{\link[optimx]{optimr}} or \code{\link{trust}}}
 }
 \value{
 An object of class \code{bbdml}.
@@ -48,20 +54,21 @@ An object of class \code{bbdml}.
 Maximum Likelihood for the Beta-binomial Distribution
 }
 \examples{
-# phyloseq example
-data(soil_phylum_small)
-bbdml(formula = OTU.1 ~ DayAmdmt,
-phi.formula = ~ DayAmdmt,
-data = soil_phylum_small)
-
 # data frame example
-seq_depth <- rpois(20, lambda = 10000)
-my_counts <- rbinom(20, size = seq_depth, prob = 0.001) * 10
-my_covariate <- cbind(rep(c(0,1), each = 10))
-colnames(my_covariate) <- c("X1")
-example_data <- data.frame("W" = my_counts, "M" = seq_depth, my_covariate)
-bbdml(formula = cbind(W, M - W) ~ X1,
-phi.formula = ~ X1,
-data = example_data)
+data(soil_phylum_small_otu1)
+bbdml(formula = cbind(W, M - W) ~ DayAmdmt,
+phi.formula = ~ DayAmdmt,
+data = soil_phylum_small_otu1)
+
+# phyloseq example (only run this if you have phyloseq installed)
+\dontrun{
+data(soil_phylum_small_sample)
+data(soil_phylum_small_otu)
+data_phylo <- phyloseq::phyloseq(phyloseq::sample_data(soil_phylum_small_sample),
+phyloseq::otu_table(soil_phylum_small_otu, taxa_are_rows = TRUE))
+bbdml(formula = Proteobacteria ~ DayAmdmt,
+phi.formula = ~ DayAmdmt,
+data = data_phylo)
+}
 
 }

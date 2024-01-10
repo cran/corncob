@@ -2,7 +2,7 @@
 % Please edit documentation in R/sandSE.R
 \name{sandSE}
 \alias{sandSE}
-\title{Compute sandwich standard error}
+\title{Compute sandwich standard errors. Legacy function. Use sand_vcov instead.}
 \usage{
 sandSE(mod, numerical = FALSE)
 }
@@ -15,13 +15,13 @@ sandSE(mod, numerical = FALSE)
 Sandwich variance-covariance matrix
 }
 \description{
-Compute sandwich standard error
+Compute sandwich standard errors. Legacy function. Use sand_vcov instead.
 }
 \examples{
-data(soil_phylum_small)
-mod <- bbdml(formula = OTU.1 ~ DayAmdmt,
+data(soil_phylum_small_otu1)
+mod <- bbdml(formula = cbind(W, M - W) ~ DayAmdmt,
 phi.formula = ~ DayAmdmt,
-data = soil_phylum_small)
+data = soil_phylum_small_otu1)
 sandSE(mod)
 
 }

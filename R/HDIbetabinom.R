@@ -8,15 +8,15 @@
 #' @return List where \code{lower} represents the lower bound and \code{upper} represents the upper bound
 #'
 #' @examples
-#' data(soil_phylum_small)
-#' mod <- bbdml(formula = OTU.1 ~ DayAmdmt,
+#' data(soil_phylum_small_otu1)
+#' mod <- bbdml(formula = cbind(W, M - W) ~ DayAmdmt,
 #' phi.formula = ~ DayAmdmt,
-#' data = soil_phylum_small)
+#' data = soil_phylum_small_otu1)
 #' HDIbetabinom(.95, M = mod$M[1], mu = mod$mu.resp[1], phi = mod$phi.resp[1])
 #'
 #' @export
 HDIbetabinom <- function(percent, M, mu, phi)  {
-  pdfvec <- VGAM::dbetabinom(x = 0:M, size = M, prob = mu, rho = phi)
+  pdfvec <- dbetabinom_cts(x = 0:M, size = M, prob = mu, rho = phi)
 
   myord <- order(pdfvec, decreasing = TRUE)
   # Get ordered values

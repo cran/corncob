@@ -10,14 +10,15 @@
 #' @param sample_names (Optional). Default \code{TRUE}. Boolean. If \code{FALSE}, remove sample names from the plot.
 #' @param data_only (Optional). Default \code{FALSE}. Boolean. If \code{TRUE}, only returns data frame.
 #' @param ... There are no optional parameters at this time.
+#' @importFrom rlang .data
 #'
 #' @return Object of class \code{ggplot}. Plot of \code{bbdml} model fit with 95% prediction intervals.
 #'
 #' @examples
-#' data(soil_phylum_small)
-#' mod <- bbdml(formula = OTU.1 ~ DayAmdmt,
+#' data(soil_phylum_small_otu1)
+#' mod <- bbdml(formula = cbind(W, M - W) ~ DayAmdmt,
 #' phi.formula = ~ DayAmdmt,
-#' data = soil_phylum_small)
+#' data = soil_phylum_small_otu1)
 #' # Here we use B = 50 for quick demonstration purposes.
 #' # In practice, we recommend a higher value for B for more accurate intervals
 #' plot(mod, color = "DayAmdmt", B = 50)
@@ -115,13 +116,22 @@ plot.bbdml <- function(x, total = FALSE, color = NULL, shape = NULL, facet = NUL
   }
 
   # reorder
-  #my_ord_str <- paste(my_ord_str, df$samples, sep = "_")
+  my_ord_str <- paste(my_ord_str, df$samples, sep = "_")
   df$order <- factor(df$samples, levels = dplyr::arrange(df, df[[colvar]],
                                                   df[[shapevar]], samples)$samples)
 
   ylab_tmp <- ifelse(!total, "Relative Abundance", "Total Counts")
 
-  aes_map <- ggplot2::aes_string(x = "order", y = "RA", colour = color, shape = shape, labs = "samples")
+  if (!is.null(color) && !is.null(shape)){
+    aes_map <- ggplot2::aes(x = .data[["order"]], y = .data[["RA"]], colour = .data[[color]], shape = .data[[shape]], labs = .data[["samples"]])
+  } else if (!is.null(color)){
+    aes_map <- ggplot2::aes(x = .data[["order"]], y = .data[["RA"]], colour = .data[[color]], labs = .data[["samples"]])
+  } else if (!is.null(shape)){
+    aes_map <- ggplot2::aes(x = .data[["order"]], y = .data[["RA"]], shape = .data[[shape]], labs = .data[["samples"]])
+  } else {
+    aes_map <- ggplot2::aes(x = .data[["order"]], y = .data[["RA"]], labs = .data[["samples"]])
+  }
+
   my_gg <- ggplot2::ggplot(df, aes_map) +
     ggplot2::geom_point() +
     ggplot2::geom_errorbar(ggplot2::aes(ymin = ymin, ymax = ymax), width = .2) +

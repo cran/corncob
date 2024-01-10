@@ -1,30 +1,22 @@
-# corncob <img src="docs/logo.png" align="right" width="165px"/>
+# corncob <img src="man/figures/logo.png" align="right" width="165px"/>
 Count Regression for Correlated Observations with the Beta-binomial
 
 `corncob` is an `R` package for modeling relative abundance and testing hypotheses about the effect of covariates on relative abundance. The `corncob` methodology was specifically developed for modelling microbial abundances based on high throughput sequencing data, such as 16S or whole-genome sequencing.
 
 <!-- badges: start -->
-[![CRAN status](https://www.r-pkg.org/badges/version/corncob)](https://CRAN.R-project.org/package=corncob)
-[![R-CMD-check](https://github.com/bryandmartin/CORNCOB/workflows/R-CMD-check/badge.svg)](https://github.com/bryandmartin/CORNCOB/actions)
-[![codecov](https://app.codecov.io/gh/bryandmartin/corncob/corncob/branch/master/graph/badge.svg?token=GnLFG7QNsh)](https://app.codecov.io/gh/bryandmartin/corncob)
+[![R-CMD-check](https://github.com/statdivlab/CORNCOB/workflows/R-CMD-check/badge.svg)](https://github.com/statdivlab/CORNCOB/actions)
+[![codecov](https://codecov.io/github/statdivlab/corncob/coverage.svg?branch=main)](https://app.codecov.io/github/statdivlab/corncob)
 [![Docker Repository on Quay](https://quay.io/repository/fhcrc-microbiome/corncob/status "Docker Repository on Quay")](https://quay.io/repository/fhcrc-microbiome/corncob)
 <!-- badges: end -->
 
 
 ## Installation
 
-To download the corncob package, use the code below.
+To install the `corncob` package, use the code below to download the development version from Github.
 
 ``` r
-install.packages("corncob")
-library(corncob)
-```
-
-Alternatively, you can install the development version directly from GitHub.
-
-``` r
-# install.packages("devtools")
-devtools::install_github("bryandmartin/corncob")
+# install.packages("remotes")
+remotes::install_github("statdivlab/corncob")
 library(corncob)
 ```
 
@@ -35,7 +27,7 @@ Instead of installing corncob to your local system, you can use corncob via the 
 
 ## Use
 
-The vignette demonstrates example usage of all main functions. Please [file an issue](https://github.com/bryandmartin/corncob/issues) if you have a request for a tutorial that is not currently included. You can see the vignette by using the following code:
+The vignettes demonstrate example usage of all main functions (they go over the same analysis, one with `phyloseq` objects and one without `phyloseq` objects). Please [file an issue](https://github.com/statdivlab/corncob/issues) if you have a request for a tutorial that is not currently included. You can see the vignette by using the following code:
 
 
 ``` r
@@ -48,6 +40,10 @@ utils::browseVignettes(package = "corncob")
 
 Note that R does not allow variable names to start with numbers. Sometimes, when going directly from QIIME2 to phyloseq objects, taxa names will be a large string starting with numbers. To clean these taxa names for use with corncob, use  `clean_taxa_names(my_phyloseq_object)`, see `?clean_taxa_names` for details.
 
+## Documentation 
+
+We additionally have a `pkgdown` [website](https://statdivlab.github.io/corncob/) that contains pre-built versions of our function [documentation](https://statdivlab.github.io/corncob/reference/index.html), [vignette](https://statdivlab.github.io/corncob/articles/corncob-intro.html), and a version of the [vignette](https://statdivlab.github.io/corncob/articles/corncob-intro-no-phyloseq.html) without `phyloseq`. 
+
 ## Citation
 
 If you use `corncob` for your analysis, please cite our manuscript:
@@ -58,4 +54,4 @@ An open-access preprint is available on arXiv [here](https://arxiv.org/abs/1902.
 
 ## Bug Reports / Change Requests
 
-If you encounter a bug or would like make a change request, please file it as an issue [here](https://github.com/bryandmartin/corncob/issues).
+If you encounter a bug or would like make a change request, please file it as an issue [here](https://github.com/statdivlab/corncob/issues).

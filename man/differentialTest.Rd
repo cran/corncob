@@ -25,6 +25,7 @@ differentialTest(
   inits_null = NULL,
   try_only = NULL,
   verbose = FALSE,
+  robust = FALSE,
   ...
 )
 }
@@ -43,7 +44,7 @@ differentialTest(
 
 \item{phi.link}{link function for dispersion covariates, defaults to \code{"logit"}}
 
-\item{test}{Character. Hypothesis testing procedure to use. One of \code{"Wald"} or \code{"LRT"} (likelihood ratio test).}
+\item{test}{Character. Hypothesis testing procedure to use. One of \code{"Wald"}, \code{"LRT"} (likelihood ratio test), or \code{"Rao"}.}
 
 \item{boot}{Boolean. Defaults to \code{FALSE}. Indicator of whether or not to use parametric bootstrap algorithm. (See \code{\link{pbWald}} and \code{\link{pbLRT}}).}
 
@@ -55,7 +56,7 @@ differentialTest(
 
 \item{filter_discriminant}{Boolean. Defaults to \code{TRUE}. If \code{FALSE}, discriminant taxa will not be filtered out.}
 
-\item{fdr_cutoff}{Integer. Defaults to \code{0.05}. Desired type 1 error rate}
+\item{fdr_cutoff}{Integer. Defaults to \code{0.05}. Desired false discovery rate.}
 
 \item{fdr}{Character. Defaults to \code{"fdr"}. False discovery rate control method, see \code{\link{p.adjust}} for more options.}
 
@@ -69,6 +70,8 @@ differentialTest(
 
 \item{verbose}{Boolean. Defaults to \code{FALSE}; print status updates for long-running analyses}
 
+\item{robust}{Should robust standard errors be used? If not, model-based standard errors are used. Logical, defaults to \code{FALSE}.}
+
 \item{...}{Optional additional arguments for \code{\link{bbdml}}}
 }
 \value{
@@ -81,13 +84,32 @@ Identify differentially-abundant and differentially-variable taxa
 See package vignette for details and example usage. Make sure the number of columns in all of the initializations are correct! \code{inits} probably shouldn't match \code{inits_null}. To use a contrast matrix, see \code{\link{contrastsTest}}.
 }
 \examples{
-# phyloseq example
-data(soil_phylum_small)
+
+# data frame example
+data(soil_phylum_small_sample)
+data(soil_phylum_small_otu)
 da_analysis <- differentialTest(formula = ~ DayAmdmt,
                                 phi.formula = ~ DayAmdmt,
                                 formula_null = ~ 1,
                                 phi.formula_null = ~ DayAmdmt,
                                 test = "Wald", boot = FALSE,
-                                data = soil_phylum_small,
-                                fdr_cutoff = 0.05)
+                                data = soil_phylum_small_otu,
+                                sample_data = soil_phylum_small_sample,
+                                fdr_cutoff = 0.05,
+                                try_only = 1:5)
+
+# phyloseq example (only run if you have phyloseq installed)
+\dontrun{
+data_phylo <- phyloseq::phyloseq(phyloseq::sample_data(soil_phylum_small_sample),
+phyloseq::otu_table(soil_phylum_small_otu, taxa_are_rows = TRUE))
+da_analysis <- differentialTest(formula = ~ DayAmdmt,
+                               phi.formula = ~ DayAmdmt,
+                               formula_null = ~ 1,
+                               phi.formula_null = ~ DayAmdmt,
+                               test = "Wald", boot = FALSE,
+                               data = data_phylo,
+                               fdr_cutoff = 0.05,
+                               try_only = 1:5)
+}
+
 }

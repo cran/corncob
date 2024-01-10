@@ -5,31 +5,34 @@
 #' @param data a data frame or \code{phyloseq} object containing the variables in the models
 #' @param link link function for abundance covariates, defaults to \code{"logit"}
 #' @param phi.link link function for dispersion covariates, defaults to \code{"logit"}
-#' @param method optimization method, defaults to \code{"trust"}, or see \code{\link{optimr}} for other options
-#' @param control optimization control parameters (see \code{\link{optimr}})
+#' @param method optimization method, defaults to \code{"trust"}, or see \code{\link[optimx]{optimr}} for other options
+#' @param control optimization control parameters (see \code{\link[optimx]{optimr}})
 #' @param numerical Boolean. Defaults to \code{FALSE}. Indicator of whether to use the numeric Hessian (not recommended).
 #' @param nstart Integer. Defaults to \code{1}. Number of starts for optimization.
 #' @param inits Optional initializations as rows of a matrix. Defaults to \code{NULL}.
-#' @param ... Optional additional arguments for \code{\link{optimr}} or \code{\link{trust}}
+#' @param allow_noninteger Boolean. Defaults to \code{FALSE}. Should noninteger W's and M's be allowed? This behavior was not permitted prior to v4.1, needs to be explicitly allowed.
+#' @param robust Should robust standard errors be returned? If not, model-based standard arras are used. Logical, defaults to \code{FALSE}.
+#' @param ... Optional additional arguments for \code{\link[optimx]{optimr}} or \code{\link{trust}}
 #'
 #' @return An object of class \code{bbdml}.
 #'
 #' @examples
-#' # phyloseq example
-#' data(soil_phylum_small)
-#' bbdml(formula = OTU.1 ~ DayAmdmt,
-#' phi.formula = ~ DayAmdmt,
-#' data = soil_phylum_small)
-#'
 #' # data frame example
-#' seq_depth <- rpois(20, lambda = 10000)
-#' my_counts <- rbinom(20, size = seq_depth, prob = 0.001) * 10
-#' my_covariate <- cbind(rep(c(0,1), each = 10))
-#' colnames(my_covariate) <- c("X1")
-#' example_data <- data.frame("W" = my_counts, "M" = seq_depth, my_covariate)
-#' bbdml(formula = cbind(W, M - W) ~ X1,
-#' phi.formula = ~ X1,
-#' data = example_data)
+#' data(soil_phylum_small_otu1)
+#' bbdml(formula = cbind(W, M - W) ~ DayAmdmt,
+#' phi.formula = ~ DayAmdmt,
+#' data = soil_phylum_small_otu1)
+#'
+#' # phyloseq example (only run this if you have phyloseq installed)
+#' \dontrun{
+#' data(soil_phylum_small_sample)
+#' data(soil_phylum_small_otu)
+#' data_phylo <- phyloseq::phyloseq(phyloseq::sample_data(soil_phylum_small_sample),
+#' phyloseq::otu_table(soil_phylum_small_otu, taxa_are_rows = TRUE))
+#' bbdml(formula = Proteobacteria ~ DayAmdmt,
+#' phi.formula = ~ DayAmdmt,
+#' data = data_phylo)
+#' }
 #'
 #' @export
 bbdml <- function(formula, phi.formula, data,
@@ -40,6 +43,8 @@ bbdml <- function(formula, phi.formula, data,
                   numerical = FALSE,
                   nstart = 1,
                   inits  = NULL,
+                  allow_noninteger = FALSE,
+                  robust = FALSE,
                   ...) {
   if (numerical) {
     control$usenumDeriv <- TRUE
@@ -75,6 +80,13 @@ bbdml <- function(formula, phi.formula, data,
   method <- try(match.arg(method, choices = c("BFGS", "trust")))
   if ("try-error" %in% class(method)) {
     stop('If method is specified, it must be either "BFGS" or "trust"!')
+  }
+  # Check that optimx is installed if method is "BFGS"
+  if (method == "BFGS") {
+    optimx_install <- try(find.package("optimx"), silent = TRUE)
+    if (inherits(optimx_install, "try-error")) {
+      {stop("If you would like to use the 'BFGS' method, please install the `optimx` package from CRAN.")}
+    }
   }
 
   mu.f <- formula
@@ -114,19 +126,53 @@ Trying to fit more parameters than sample size. Model cannot be estimated.")
   # Sample Size
   M <- rowSums(resp)
 
+  has_noninteger <- any(round(W) != W) | any(round(M) != M)
+  if (!allow_noninteger & has_noninteger) {
+    stop("You don't have counts in your abundances. \n
+         Double-check and correct your data, and/or force the model to fit with `allow_noninteger`")
+  }
+
   # Check for separation
   sep_da <- sep_dv <- FALSE
   if (length(attr(terms.mu, "term.labels") != 0)) {
-    sep_da <- separationDetection(
-      y = cbind(W, M - W), x = X.b, family = stats::binomial("logit"), control = list(purpose = "test")
+
+    withCallingHandlers(
+      expr = {
+        sep_da <- separationDetection(
+          y = cbind(W, M - W), x = X.b, family = stats::binomial("logit"), control = list(purpose = "test")
+        )
+      },
+      warning = function(w) {
+        if (allow_noninteger & grepl("non-integer counts in a binomial glm", w$message)) {
+          invokeRestart("muffleWarning")
+        } else {
+          warning(w$message, call.=F)
+          invokeRestart("muffleWarning")
+        }
+      }
     )
+
     if (sep_da) separationWarning(model_name = "abundance model")
   }
 
   if (length(attr(terms.phi, "term.labels") != 0)) {
-    sep_dv <- separationDetection(
-      y = cbind(W, M - W), x = X.bstar, family = stats::binomial("logit"), control = list(purpose = "test")
-    )
+
+    withCallingHandlers(
+        expr = {
+          sep_dv <- separationDetection(
+            y = cbind(W, M - W), x = X.bstar, family = stats::binomial("logit"), control = list(purpose = "test")
+          )
+        },
+        warning = function(w) {
+          if (allow_noninteger & grepl("non-integer counts in a binomial glm", w$message)) {
+            invokeRestart("muffleWarning")
+          } else {
+            warning(w$message, call.=F)
+            invokeRestart("muffleWarning")
+          }
+        }
+      )
+
     if (sep_dv) separationWarning(model_name = "dispersion model")
   }
 
@@ -170,7 +216,7 @@ Trying to fit more parameters than sample size. Model cannot be estimated.")
                                                nstart = 1,
                                                use = FALSE))
       } else {
-        val_init <- suppressWarnings(sum(VGAM::dbetabinom(W, M, prob = mu_init, rho = phi_init, log = TRUE)))
+        val_init <- suppressWarnings(sum(dbetabinom_cts(W, M, prob = mu_init, rho = phi_init, log = TRUE)))
         if (is.nan(val_init) || any(phi_init <= sqrt(.Machine$double.eps)) || any(phi_init >= 1 - sqrt(.Machine$double.eps))) {
           warning(paste("Initialization",i,"invalid. Automatically generating new initialization."), immediate. = TRUE)
           inits[i,] <- suppressWarnings(genInits(W = W,
@@ -241,18 +287,47 @@ Trying to fit more parameters than sample size. Model cannot be estimated.")
   bestOut <- NULL
 
   # if (nstart >= 2) {
-    for (i in 1:nstart) {
-      ### BEGIN FOR
-      theta.init <- inits[i,]
-      # replace any NA inits with 0
-      theta.init[which(is.na(theta.init))] <- 0
-      if (method == "BFGS") {
-        #starttime <- proc.time()[1]
-        mlout <- try(optimr::optimr(par = theta.init,
-                                fn = dbetabin_neg,
-                                gr = gr_full,
-                                method = method,
-                                control = control,
+  for (i in 1:nstart) {
+    ### BEGIN FOR
+    theta.init <- inits[i,]
+    # replace any NA inits with 0
+    theta.init[which(is.na(theta.init))] <- 0
+    if (method == "BFGS") {
+      #starttime <- proc.time()[1]
+      # optimx::optimr prints out all of the control parameters, suppress these print statements with `invisible(capture.output())`
+      invisible(utils::capture.output(mlout <- suppressWarnings(try(optimx::optimr(par = theta.init,
+                                                                                   fn = dbetabin_neg,
+                                                                                   gr = gr_full,
+                                                                                   method = method,
+                                                                                   control = control,
+                                                                                   W = W,
+                                                                                   M = M,
+                                                                                   X = X.b,
+                                                                                   X_star = X.bstar,
+                                                                                   np = np,
+                                                                                   npstar = npstar,
+                                                                                   link = link,
+                                                                                   phi.link = phi.link, logpar = TRUE),
+                                                                    silent = TRUE)))); if (inherits(mlout, "try-error")) next
+      #theta.orig <- theta.init
+      #curtime <- proc.time()[1] - starttime
+
+      if (is.null(bestOut)) bestOut <- mlout
+      # if the model is improved
+      if (mlout$value < bestOut$value) {
+        bestOut <- mlout
+        #time <- curtime
+      }
+    } ### END IF bfgs
+    if (method == "trust") {
+      #starttime <- proc.time()[1]
+      if (is.null(argList$rinit)) {
+        rinit <- 1
+      }
+      if (is.null(argList$rmax)) {
+        rmax <- 100
+      }
+      mlout <- try(trust::trust(objfun, parinit = theta.init,
                                 W = W,
                                 M = M,
                                 X = X.b,
@@ -260,47 +335,19 @@ Trying to fit more parameters than sample size. Model cannot be estimated.")
                                 np = np,
                                 npstar = npstar,
                                 link = link,
-                                phi.link = phi.link, logpar = TRUE),
-                     silent = TRUE); if (inherits(mlout, "try-error")) next
-        #theta.orig <- theta.init
-        #curtime <- proc.time()[1] - starttime
+                                phi.link = phi.link,
+                                rinit = rinit, rmax = rmax),
+                   silent = TRUE); if (inherits(mlout, "try-error")) next
+      #curtime <- proc.time()[1] - starttime
 
-        if (is.null(bestOut)) bestOut <- mlout
-        # if the model is improved
-        if (mlout$value < bestOut$value) {
-          bestOut <- mlout
-          #time <- curtime
-        }
-      } ### END IF bfgs
-      if (method == "trust") {
-        #starttime <- proc.time()[1]
-          if (is.null(argList$rinit)) {
-            rinit <- 1
-          }
-          if (is.null(argList$rmax)) {
-            rmax <- 100
-          }
-        mlout <- try(trust::trust(objfun, parinit = theta.init,
-                              W = W,
-                              M = M,
-                              X = X.b,
-                              X_star = X.bstar,
-                              np = np,
-                              npstar = npstar,
-                              link = link,
-                              phi.link = phi.link,
-                              rinit = rinit, rmax = rmax),
-                     silent = TRUE); if (inherits(mlout, "try-error")) next
-        #curtime <- proc.time()[1] - starttime
-
-        if (is.null(bestOut)) bestOut <- mlout
-        # if the model is improved
-        if (mlout$value < bestOut$value) {
-          bestOut <- mlout
-          #time <- curtime
-        }
-      } ### END IF trust
-    } ### END FOR - inits
+      if (is.null(bestOut)) bestOut <- mlout
+      # if the model is improved
+      if (mlout$value < bestOut$value) {
+        bestOut <- mlout
+        #time <- curtime
+      }
+    } ### END IF trust
+  } ### END FOR - inits
   # } ### END IF - nstarts
 
   if (is.null(bestOut)) stop("Model could not be optimized! Try changing initializations or simplifying your model.")
@@ -356,39 +403,11 @@ Trying to fit more parameters than sample size. Model cannot be estimated.")
       np.total = nppar, np.mu = np, np.phi = npstar,
       df.model = df.model, df.residual = df.residual,
       logL = logL, inits = inits, sep_da = sep_da, sep_dv = sep_dv,
-      iterations = iterations, code = code, msg = msg),
+      iterations = iterations, code = code, msg = msg,
+      robust = robust,
+      allow_noninteger = allow_noninteger,
+      has_noninteger = has_noninteger),
     class = "bbdml")
 }
 
 
-# Wrapper around detectseparation::detect_separation
-#
-# All arguments are always passed to detect_separation as is, except for x.
-# If x has only 1 column, x is replaced with cbind(1, x)
-#
-# Return value is TRUE or FALSE, extracted from either the "separation" or "outcome" element returned by detect_separation
-# The name of this element changed between detectseparation package versions 0.2 and 0.3
-separationDetection <- function(y, x, family, control) {
-  if (ncol(x) == 1) x <- cbind(1, x)
-  separation <- detectseparation::detect_separation(y = y, x = x, family = family, control = control)
-
-  # name of boolean element in list returned by detect_separation changed between package versions
-  if (utils::packageVersion("detectseparation") < "0.3") {
-    return(separation[["separation"]])
-  } else {
-    return(separation[["outcome"]])
-  }
-}
-
-# Simple helper to generate warning about detected separation in a bbdml model
-# model_name takes a string, e.g. "abundance model" or "dispersion model"
-separationWarning <- function(model_name) {
-  warning(paste(
-    paste0("Separation detected in ", model_name, "!"),
-    "Likely, one of your covariates/experimental conditions is such that",
-    "there are all zero counts within a group. Consider identifying and removing",
-    "this covariate from your model. The results of this model are not to be",
-    "trusted because there is not enough data. \n",
-    sep = "\n"
-  ), immediate. = TRUE, call. = FALSE)
-}

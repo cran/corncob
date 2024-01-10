@@ -7,17 +7,20 @@
 #' @return P-value from parametric bootstrap likelihood ratio test.
 #'
 #' @examples
-#' data(soil_phylum_small)
-#' mod1 <- bbdml(formula = OTU.1 ~ DayAmdmt,
+#' data(soil_phylum_small_otu1)
+#' mod1 <- bbdml(formula = cbind(W, M - W) ~ DayAmdmt,
 #' phi.formula = ~ DayAmdmt,
-#' data = soil_phylum_small)
+#' data = soil_phylum_small_otu1)
 #'
-#' mod2 <- bbdml(formula = OTU.1 ~ 1,
+#' mod2 <- bbdml(formula = cbind(W, M - W) ~ 1,
 #' phi.formula = ~ 1,
-#' data = soil_phylum_small)
+#' data = soil_phylum_small_otu1)
 #' pbLRT(mod1, mod2, B = 50)
 #' @export
 pbLRT <- function(mod, mod_null, B = 1000) {
+
+  if (mod$has_noninteger) stop("Can't perform parametric bootstrap with non-integer M or W. ")
+
   checkNested(mod, mod_null)
   t.observed <- 2 * (mod$logL - mod_null$logL)
   BOOT <- rep(NA, B)

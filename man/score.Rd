@@ -2,28 +2,28 @@
 % Please edit documentation in R/score.R
 \name{score}
 \alias{score}
-\title{Compute score}
+\title{Compute score at the MLE}
 \usage{
-score(mod, numerical = FALSE, forHess = FALSE)
+score(mod, numerical = FALSE, get_score_covariance = FALSE)
 }
 \arguments{
 \item{mod}{an object of class \code{bbdml}}
 
 \item{numerical}{Boolean. Defaults to \code{FALSE}. Indicator of whether to use the numeric Hessian and score (not recommended).}
 
-\item{forHess}{Boolean. Defaults to \code{FALSE}. Indicator of whether to put in vector form. Defaults to FALSE. This parameter is not intended for users.}
+\item{get_score_covariance}{Boolean. Defaults to \code{FALSE}. Should we return a robust estimate of variance of score: \eqn{\hat{B}(\hat{\theta}) = \sum_i G(\hat{\theta}; W_i) G(\hat{\theta}; W_i)^T}. This parameter is not intended for users.}
 }
 \value{
-Score
+Score at the MLE. For \eqn{G(\theta, w)} score function, returns \eqn{\sum_i G(\hat{\theta}, W_i)} if get_score_covariance = FALSE.
 }
 \description{
-Compute score
+Compute score at the MLE
 }
 \examples{
-data(soil_phylum_small)
-mod <- bbdml(formula = OTU.1 ~ DayAmdmt,
+data(soil_phylum_small_otu1)
+mod <- bbdml(formula = cbind(W, M - W) ~ DayAmdmt,
 phi.formula = ~ DayAmdmt,
-data = soil_phylum_small)
+data = soil_phylum_small_otu1)
 score(mod)
 
 }
