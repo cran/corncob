@@ -8,7 +8,7 @@ phy <- requireNamespace("phyloseq", quietly = TRUE) == TRUE
 print(paste0("phyloseq is installed: ", phy))
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  remotes::install_github("statdivlab/corncob")
+# remotes::install_github("statdivlab/corncob")
 
 ## ----message = FALSE, eval = phy----------------------------------------------
 library(corncob)
@@ -60,6 +60,10 @@ plot(corncob, total = TRUE, color = "DayAmdmt", B = 50)
 
 ## ----eval = phy---------------------------------------------------------------
 plot(corncob, color = "DayAmdmt", B = 50)
+
+## -----------------------------------------------------------------------------
+df <- plot(corncob, color = "DayAmdmt", B = 50, data_only = TRUE)
+head(df)
 
 ## ----eval = phy---------------------------------------------------------------
 corncob_da <- bbdml(formula = OTU.1 ~ DayAmdmt,
@@ -119,6 +123,16 @@ da_analysis$p_fdr[1:5]
 
 ## ----eval = phy---------------------------------------------------------------
 plot(da_analysis)
+
+## -----------------------------------------------------------------------------
+df <- plot(da_analysis, data_only = TRUE)
+
+# we can easily remove special characters used in our formatting steps
+df <- df %>%
+  dplyr::mutate(variable = gsub("\nDifferential Abundance", "",
+                                variable, fixed = TRUE))
+
+head(df)
 
 ## ----eval = phy---------------------------------------------------------------
 which(is.na(da_analysis$p)) %>% names

@@ -2,7 +2,7 @@
 knitr::opts_chunk$set(fig.width=8, fig.height=4) 
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  remotes::install_github("statdivlab/corncob")
+# remotes::install_github("statdivlab/corncob")
 
 ## ----message = FALSE----------------------------------------------------------
 library(corncob)
@@ -104,6 +104,16 @@ da_analysis$p_fdr[1:5]
 
 ## -----------------------------------------------------------------------------
 plot(da_analysis)
+
+## -----------------------------------------------------------------------------
+df <- plot(da_analysis, data_only = TRUE)
+
+# we can easily remove special characters used in our formatting steps
+df <- df %>%
+  dplyr::mutate(variable = gsub("\nDifferential Abundance", "",
+                                variable, fixed = TRUE))
+
+head(df)
 
 ## -----------------------------------------------------------------------------
 which(is.na(da_analysis$p)) %>% names

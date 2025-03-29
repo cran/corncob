@@ -1,7 +1,7 @@
 Package: corncob
 Title: Count Regression for Correlated Observations with the
         Beta-Binomial
-Version: 0.4.1
+Version: 0.4.2
 Authors@R: c(
     person("Bryan D", "Martin", role = "aut"),
     person("Daniela", "Witten", role = "aut"),
@@ -20,12 +20,12 @@ Imports: stats, utils, VGAM, numDeriv, ggplot2, trust, dplyr, magrittr,
         detectseparation, scales, rlang
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Suggests: knitr, rmarkdown, testthat, covr, limma, slam, R.rsp, optimx,
         phyloseq
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2024-01-10 20:23:01 UTC; sarahteichman
+Packaged: 2025-03-28 16:43:35 UTC; sarahteichman
 Author: Bryan D Martin [aut],
   Daniela Witten [aut],
   Sarah Teichman [ctb],
@@ -34,4 +34,4 @@ Author: Bryan D Martin [aut],
   Xiangjie Xue [ctb] (VGAM library)
 Maintainer: Amy D Willis <adwillis@uw.edu>
 Repository: CRAN
-Date/Publication: 2024-01-10 21:03:05 UTC
+Date/Publication: 2025-03-29 15:30:19 UTC

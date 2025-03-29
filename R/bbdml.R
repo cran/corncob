@@ -12,7 +12,7 @@
 #' @param inits Optional initializations as rows of a matrix. Defaults to \code{NULL}.
 #' @param allow_noninteger Boolean. Defaults to \code{FALSE}. Should noninteger W's and M's be allowed? This behavior was not permitted prior to v4.1, needs to be explicitly allowed.
 #' @param robust Should robust standard errors be returned? If not, model-based standard arras are used. Logical, defaults to \code{FALSE}.
-#' @param ... Optional additional arguments for \code{\link[optimx]{optimr}} or \code{\link{trust}}
+#' @param ... Optional additional arguments for \code{\link[optimx]{optimr}} or \code{\link[trust]{trust}}
 #'
 #' @return An object of class \code{bbdml}.
 #'
@@ -54,8 +54,8 @@ bbdml <- function(formula, phi.formula, data,
 
   # Convert phyloseq objects
   if ("phyloseq" %in% class(data)) {
-    select <- all.vars(formula)[1]
-    data <- convert_phylo(data, select = select)
+    selection <- all.vars(formula)[1]
+    data <- convert_phylo(data, select = selection)
     # Update formula to match convert_phylo specification
     formula <- stats::update(formula, cbind(W, M - W) ~ .)
   }
@@ -139,7 +139,10 @@ Trying to fit more parameters than sample size. Model cannot be estimated.")
     withCallingHandlers(
       expr = {
         sep_da <- separationDetection(
-          y = cbind(W, M - W), x = X.b, family = stats::binomial("logit"), control = list(purpose = "test")
+          y = cbind(W, M - W), x = X.b, family = stats::binomial("logit"),
+          control = list(implementation = "lpSolveAPI",
+                         linear_program = "primal",
+                         purpose = "test")
         )
       },
       warning = function(w) {
@@ -160,7 +163,10 @@ Trying to fit more parameters than sample size. Model cannot be estimated.")
     withCallingHandlers(
         expr = {
           sep_dv <- separationDetection(
-            y = cbind(W, M - W), x = X.bstar, family = stats::binomial("logit"), control = list(purpose = "test")
+            y = cbind(W, M - W), x = X.bstar, family = stats::binomial("logit"),
+            control = list(implementation = "lpSolveAPI",
+                           linear_program = "primal",
+                           purpose = "test")
           )
         },
         warning = function(w) {
